@@ -1,0 +1,113 @@
+PRODUCT LIST
+
+import React from 'react';
+import ProductCard from './ProductCard';
+
+const ProductList = ({ products }) => {
+  return (
+    <div className="product-list">
+      {products.map((product) => (
+        <ProductCard key={product.id} product={product} />
+      ))}
+    </div>
+  );
+};
+
+export default ProductList;
+
+PRODUCT CARD
+
+import React from 'react';
+
+const ProductCard = ({ product }) => {
+  return (
+    <div className="product-card">
+      <img src={product.imageUrl} alt={product.name} />
+      <h3>{product.name}</h3>
+      <p>Price: ${product.price}</p>
+      <p>Rating: {product.rating}</p>
+      {/* Add more details as needed */}
+    </div>
+  );
+};
+
+export default ProductCard;
+
+SEARCH FORM
+
+import React, { useState } from 'react';
+
+const SearchForm = ({ onSearch }) => {
+  const [category, setCategory] = useState('');
+  const [n, setN] = useState(10);
+  const [sort, setSort] = useState('');
+  const [order, setOrder] = useState('asc');
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSearch({ category, n, sort, order });
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <label htmlFor="category">Category:</label>
+      <input type="text" id="category" value={category} onChange={(e) => setCategory(e.target.value)} />
+
+      <label htmlFor="n">Number of Products:</label>
+      <input type="number" id="n" value={n} onChange={(e) => setN(parseInt(e.target.value))} />
+
+      <label htmlFor="sort">Sort By:</label>
+      <select id="sort" value={sort} onChange={(e) => setSort(e.target.value)}>
+        <option value="">None</option>
+        <option value="price">Price</option>
+        <option value="rating">Rating</option>
+      </select>
+
+      <label htmlFor="order">Order:</label>
+      <select id="order" value={order} onChange={(e) => setOrder(e.target.value)}>
+        <option value="asc">Ascending</option>
+        <option value="desc">Descending</option>
+      </select>
+
+      <button type="submit">Search</button>
+    </form>
+  );
+};
+
+export default SearchForm;
+
+
+APP
+
+import { useState, useEffect } from 'react';
+import ProductList from './ProductList';
+
+const App = () => {}
+  const [products, setProducts] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const fetchProducts = async (category, n, sort, order) => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch(`/categories/<span class="math-inline">\{category\}/products?n\=</span>{n}&sort=<span class="math-inline">\{sort\}&order\=</span>{order}`);
+      const data = await response.json();
+      setProducts(data);
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    // Fetch initial products on load (optional)
+  }, []);
+
+  export const handleSearch = (searchParams) => {
+    fetchProducts(searchParams.category, searchParams.n, searchParams.sort, searchParams.order);
+  };
+
+
